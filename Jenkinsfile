@@ -1,67 +1,152 @@
 pipeline {
-  agent any
 
-tools {
-    nodejs "Nodejs"
-}
+    agent any
 
- environment {
-    DOCKER_REGISTRY = "docker.io"
-    DOCKERHUB_CREDENTIALS = credentials('DOCKER_HUB_CREDENTIAL')
-    VERSION = "${env.BUILD_ID}"
-  }
-
-  stages {
-
- stage('Install Dependencies') {
-      steps {
-
-        sh 'npm ci'
-      }
+    tools {
+        nodejs "Nodejs"
     }
 
-    stage('Build Project') {
-      steps {
-        // Build the Angular project
-        sh 'npm run build'
-      }
+    environment {
+        DOCKER_REGISTRY = "docker.io"
+        DOCKERHUB_CREDENTIALS = credentials('DOCKER_HUB_CREDENTIAL')
+        VERSION = "${env.BUILD_ID}"
+        IMAGE_NAME = "namrata11111/food-delivery-app-fe"
     }
 
 
-    stage('Docker Build and Push') {
-      steps {
-          sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-          sh 'docker build -t namrata11111/food-delivery-app-fe:${VERSION} .'
-          sh 'docker push namrata11111/food-delivery-app-fe:${VERSION}'
-      }
-    }
+    stages {
 
 
-     stage('Cleanup Workspace') {
-      steps {
-        deleteDir()
-      }
-    }
-
-     stage('Update Image Tag in GitOps') {
-      steps {
-         checkout scmGit(branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[credentialsId: 'git-ssh-keys', url: 'git@github.com:deveshraut2372/deployement-files.git']])
-        script {
-          // Set the new image tag with the Jenkins build number
-       sh '''
-          sed -i "s/image:.*/image: namrata11111\\/food-delivery-app:${VERSION}/" aws/angular-manifest.yml
-        '''
-
-          sh 'git checkout master'
-          sh 'git add .'
-          sh 'git commit -m "Update image tag"'
-        sshagent(['git-ssh-keys'])
-            {
-                  sh('git push')
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm ci'
             }
         }
-      }
+
+
+        stage('Build Angular Project') {
+            steps {
+                sh 'npm run build'
+            }
+        }
+
+
+        stage('Docker Build and Push') {
+            steps {
+
+                sh '''
+                echo $DOCKERHUB_CREDENTIALS_PSW | docker login \
+                -u $DOCKERHUB_CREDENTIALS_USR \
+                --password-stdin
+                '''
+
+                sh '''
+                docker build \
+                -t ${IMAGE_NAME}:${VERSION} .
+                '''
+
+                sh '''
+                docker push ${IMAGE_NAME}:${VERSION}
+                '''
+
+                sh 'docker logout'
+            }
+        }
+
+
+        stage('Update Image Tag in GitOps') {
+
+            steps {
+
+                checkout scmGit(
+                    branches: [[name: '*/master']],
+                    extensions: [],
+                    userRemoteConfigs: [[
+                        credentialsId: 'git-ssh-keys',
+                        url: 'git@github.com:deveshraut2372/deployement-files.git'
+                    ]]
+                )
+
+
+                script {
+
+                    sh '''
+                    echo "Updating image tag..."
+
+                    sed -i "s|image:.*|image: ${IMAGE_NAME}:${VERSION}|g" aws/angular-manifest.yml
+                    '''
+
+
+                    sh '''
+                    git config user.email "jenkins@example.com"
+                    git config user.name "Jenkins"
+
+                    git add .
+
+                    git diff --cached --quiet || \
+                    git commit -m "Update image tag ${VERSION}"
+                    '''
+
+
+                    sshagent(['git-ssh-keys']) {
+
+                        sh '''
+                        git push origin master
+                        '''
+
+                    }
+
+                }
+            }
+        }
+
+
+        stage('Cleanup Workspace') {
+
+            steps {
+
+                deleteDir()
+
+            }
+        }
+
+
+        stage('Docker Cleanup') {
+
+            steps {
+
+                sh '''
+                docker image prune -f
+                '''
+
+            }
+        }
+
     }
-  }
+
+
+    post {
+
+        success {
+
+            echo "Pipeline completed successfully"
+
+        }
+
+
+        failure {
+
+            echo "Pipeline failed"
+
+        }
+
+
+        always {
+
+            echo "Cleaning workspace"
+
+        }
+
+    }
 
 }
