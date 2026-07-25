@@ -1,0 +1,92 @@
+.navbar {
+  padding: 1rem 0;
+}
+
+.navbar-left {
+  display: flex;
+  
+  align-items: center;
+  gap: 2rem;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  text-decoration: none;
+  color: #ff6b6b !important;
+  transition: opacity 0.3s ease;
+  
+}
+
+.navbar-brand:hover {
+  opacity: 0.8;
+}
+
+.company-icon {
+  font-size: 2rem;
+}
+
+.company-name {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.username-greeting {
+  font-size: 1rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.username-greeting strong {
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #ff6b6b;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.profile-img:hover {
+  transform: scale(1.1);
+}
+
+.dropdown-menu {
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: #ff6b6b;
+}
+
+@media (max-width: 768px) {
+  .navbar-left {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .username-greeting {
+    white-space: normal;
+  }
+
+  .navbar-right {
+    width: 100%;
+    justify-content: space-around;
+  }
+}

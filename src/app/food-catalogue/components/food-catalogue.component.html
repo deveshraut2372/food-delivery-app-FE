@@ -1,0 +1,59 @@
+<div class=" bg-light  mt-4   ">
+    <div class="row w-100 text-center d-flex p-4">
+        <div class=" col">
+                <div class="title">
+                    <h3>{{restaurant.name}}</h3>
+                </div>
+        </div >
+         <div class=" col ">
+                <button class="btn btn-success "  (click)="checkOut()"> Check Out</button>
+        </div>
+    </div>
+
+    <div class="  des text-center">
+        <p>
+           {{restaurant.restaurantDescription}}
+        </p>
+    </div>
+
+    <!--  List of foodItems  -->
+
+    <div class="text-center">
+        <h3> Food Menu</h3>
+    </div>
+
+      <div class=" container ">
+      <table class="table table-striped ">
+  <thead>
+    <tr class="text-center">
+      <th scope="col">Name</th>
+      <!-- <th scope="col">Description</th> -->
+      <!-- <th scope="col">Veg/Non-veg</th> -->
+      <th scope="col">Price</th>
+      <th scope="col">quantity</th>
+      <th scope="col" class="text-center" colspan="2"> Action</th>
+    </tr>
+  </thead>
+  <tbody>
+   
+    <tr 
+        *ngFor="let item of foodCatalogue.foodItemList "
+        
+        class="text-center"
+        >
+        <td>{{item.itemName}}</td>
+        <!-- <td>{{item.itemDescription}}</td> -->
+        <!-- <td><span>{{ item.veg ? 'Veg' : 'Non-Veg' }}</span></td> -->
+        <td>{{item.price}}</td>
+        <td>{{item.quantity}}</td>
+        <td><button class="btn btn-primary" (click)="plus(item)" > + </button></td>
+        <td><button class="btn btn-primary"  (click)="minus(item)"  *ngIf="item.quantity > 0 "  > - </button></td>
+    
+    </tr>
+   
+  </tbody>
+</table>
+
+</div>
+
+</div>
